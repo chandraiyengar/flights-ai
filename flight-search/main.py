@@ -17,6 +17,7 @@ def search_flights(
     infants_on_lap: int = 0,
     max_stops: Union[int, None] = None
 ):
+    print(f"Searching for flights on {date} from {from_airport} to {to_airport} with {adults} adults, {children} children, {infants_in_seat} infants in seat, {infants_on_lap} infants on lap, and {max_stops} max stops")
     flight_data = FlightData(
         date=date,
         from_airport=from_airport,
