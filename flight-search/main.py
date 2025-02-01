@@ -1,6 +1,6 @@
 from typing import Union
 from fast_flights import FlightData, Passengers, Result, get_flights
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
@@ -31,13 +31,17 @@ def search_flights(
         infants_in_seat=infants_in_seat,
         infants_on_lap=infants_on_lap
     )
+    try:
+        result: Result = get_flights(
+            flight_data=[flight_data],
+            trip=trip,
+            seat=seat,
+            passengers=passengers,
+            fetch_mode="fallback",
+        )
+        print(result)
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching flights")
 
-    result: Result = get_flights(
-        flight_data=[flight_data],
-        trip=trip,
-        seat=seat,
-        passengers=passengers,
-        fetch_mode="fallback",
-    )
-    print(result)
     return result
