@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
 import { streamText, tool } from 'ai';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
-    model: openai('gpt-4o'),
+    model: anthropic('claude-3-5-sonnet-20241022'),
     system: 'You are a helpful assistant that can search for flights and provide information about them.' + 
     'If someone asks for information about a flight and there are multiple options, ' + 
     'you should provide a list of the options and ask the user to select one.' + 
