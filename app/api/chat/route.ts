@@ -28,7 +28,12 @@ export async function POST(req: Request) {
     'If someone asks for information about a flight and there are multiple options, ' + 
     'you should provide a list of the options and ask the user to select one.' + 
     'Disregard any is_best information you receive from the searchFlights tool.' +
-    'Assume the user is asking for flights in the year 2025 if no year is specified.',
+    'Assume the user is asking for flights in the year 2025 if no year is specified.' +
+    'If the user doesn\'t specify what format they want the answer, ' +
+    'give them a summary of the flights, as one piece of text.' +
+    'For each flight, you should say the time it is leaving and the price.' +
+    'If there are more than 4 flights, just say the range of prices and times.' +
+    'Do not give a list of more than 4 flights!',
     messages,
     tools: {
       weather: tool({
