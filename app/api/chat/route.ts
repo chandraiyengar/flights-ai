@@ -55,6 +55,7 @@ export async function POST(req: Request) {
         execute: (searchFlightParams) => searchFlights(searchFlightParams),
       }),
     },
+    maxSteps: 10,
   });
 
   return result.toDataStreamResponse();
