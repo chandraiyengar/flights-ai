@@ -6,13 +6,13 @@ const SearchFlightsParams = z.object({
   date: z.string().describe('Flight date in YYYY-MM-DD format'),
   fromAirport: z.string().describe('Departure airport code (e.g. "LAX")'),
   toAirport: z.string().describe('Arrival airport code (e.g. "JFK")'),
-  trip: z.enum(['one-way', 'round']).describe('Trip type: one-way or round'),
-  seat: z.enum(['economy', 'business', 'first']).describe('Seat class preference'),
-  adults: z.number().min(0).describe('Number of adult passengers'),
-  children: z.number().min(0).optional().describe('Number of child passengers'),
-  infantsInSeat: z.number().min(0).optional().describe('Number of infants requiring their own seat'),
-  infantsOnLap: z.number().min(0).optional().describe('Number of lap infants'),
-  maxStops: z.number().min(0).optional().describe('Maximum number of stops allowed')
+  trip: z.enum(['one-way', 'round']).default('one-way').describe('Trip type: one-way or round'),
+  seat: z.enum(['economy', 'business', 'first']).default('economy').describe('Seat class preference'),
+  adults: z.number().min(0).default(1).describe('Number of adult passengers'),
+  children: z.number().min(0).default(0).optional().describe('Number of child passengers'),
+  infantsInSeat: z.number().min(0).default(0).optional().describe('Number of infants requiring their own seat'),
+  infantsOnLap: z.number().min(0).default(0).optional().describe('Number of lap infants'),
+  maxStops: z.number().min(0).default(0).optional().describe('Maximum number of stops allowed')
 });
 
 type SearchFlightsParams = z.infer<typeof SearchFlightsParams>;
@@ -24,6 +24,11 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: openai('gpt-4o'),
+    system: 'You are a helpful assistant that can search for flights and provide information about them.' + 
+    'If someone asks for information about a flight and there are multiple options, ' + 
+    'you should provide a list of the options and ask the user to select one.' + 
+    'Disregard any is_best information you receive from the searchFlights tool.' +
+    'Assume the user is asking for flights in the year 2025 if no year is specified.',
     messages,
     tools: {
       weather: tool({
@@ -54,8 +59,8 @@ const searchFlights = async ({
   date, 
   fromAirport, 
   toAirport, 
-  trip, 
-  seat, 
+  trip = 'one-way', 
+  seat = 'economy', 
   adults = 1, 
   children = 0, 
   infantsInSeat = 0, 
@@ -72,7 +77,7 @@ const searchFlights = async ({
     children: children.toString(),
     infants_in_seat: infantsInSeat.toString(),
     infants_on_lap: infantsOnLap.toString(),
-    ...(maxStops !== undefined && { max_stops: maxStops.toString() })
+    max_stops: maxStops.toString()
   })
   console.log("Calling flight search API");
   console.log("URL: ", url);
@@ -84,6 +89,8 @@ const searchFlights = async ({
   }
 
   console.log("Response: ", response);
+  const data = await response.json();
+  const firstTenFlights = data.flights.slice(0, 10);
 
-  return await response.json();
+  return firstTenFlights;
 };

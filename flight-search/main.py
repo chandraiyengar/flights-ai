@@ -39,4 +39,5 @@ def search_flights(
         passengers=passengers,
         fetch_mode="fallback",
     )
+    print(result)
     return result
