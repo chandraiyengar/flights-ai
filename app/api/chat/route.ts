@@ -34,7 +34,10 @@ export async function POST(req: Request) {
     'For each flight, you should say the time it is leaving and the price.' +
     'If there are more than 4 flights, just say the range of prices and times.' +
     'Do not give a list of more than 4 flights!' +
-    'If there are flights from different airports, make sure to mention which airports they are from.',
+    'You should first try to get airport codes for a location if the user provides a city name.' +
+    'If there are multiple airports in a city, you should get the place code and use that instead to search for flights.' +
+    'If there are flights from different airports, make sure to mention which airports they are from.' +
+    'Do not tell the user about getting the place code or airports, just do it. ',
     messages,
     tools: {
       weather: tool({
@@ -54,6 +57,17 @@ export async function POST(req: Request) {
         description: 'Search for available flights between airports',
         parameters: SearchFlightsParams,
         execute: (searchFlightParams) => searchFlights(searchFlightParams),
+      }),
+      getAirports: tool({
+        description: 'Get the airports in a location',
+        parameters: z.object({
+          location: z.string().describe('The location to get the airports for'),
+        }),
+        execute: async ({ location }) => {
+          const response = await fetch(`http://localhost:8000/airports?location=${location}`);
+          const data = await response.json();
+          return data;
+        },
       }),
       findPlaceCode: tool({
         description: 'Find the place code for a location which has more than one airport.',
@@ -88,7 +102,7 @@ export async function POST(req: Request) {
         },
       }),
     },
-    maxSteps: 10,
+    maxSteps: 20,
   });
 
   return result.toDataStreamResponse();

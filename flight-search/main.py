@@ -1,11 +1,15 @@
 from typing import Union
-from fast_flights import FlightData, Passengers, Result, get_flights
+from fast_flights import FlightData, Passengers, Result, get_flights, search_airport
 from fastapi import FastAPI, HTTPException
 import logging
 
 logger = logging.getLogger("uvicorn")
 
 app = FastAPI()
+
+@app.get("/airports")
+def get_airports(location: str):
+    return search_airport(location)
 
 @app.get("/flights")
 def search_flights(
